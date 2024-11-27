@@ -22,6 +22,14 @@ const actionTypes = [{
     label: 'Take item'
 }];
 
+const visibilityTypes = [{
+    key  : 'always',
+    label: 'Always'
+}, {
+    key  : 'has_item',
+    label: 'Has item'
+}];
+
 const startSection = useLocalStorage<number>('startSection', () => 0, {
     initOnMounted: true
 });
@@ -46,7 +54,13 @@ function newSection() {
 function editSection(section: Section) {
     editSectionState.value = {
         ...section,
-        variants: [...section.variants]
+        variants: [
+            ...section.variants.map(variant => ({
+                ...variant,
+                action    : {...variant.action},
+                visibility: {...variant.visibility}
+            }))
+        ]
     };
 }
 
@@ -64,9 +78,13 @@ function updateSection() {
 
 function addVariant() {
     editSectionState.value.variants.push({
-        label : '',
-        action: {
+        label     : '',
+        action    : {
             type: 'go'
+        },
+        visibility: {
+            type    : 'always',
+            negative: false
         }
     });
 }
@@ -148,7 +166,7 @@ function moveDown(array, index) {
 
                         <div class="flex flex-col gap-2.5">
                             <div v-for="(variant, index) in editSectionState.variants"
-                                 class="flex flex-col gap-2.5 border-s-2 border-primary bg-gray-950 p-1.5">
+                                 class="flex flex-col gap-2.5 border-s-2 border-primary bg-gray-950 p-2.5 rounded">
                                 <div class="flex gap-2.5">
                                     <UInput v-model="variant.label"
                                             placeholder="Label"
@@ -190,6 +208,27 @@ function moveDown(array, index) {
                                                      value-attribute="id"
                                                      searchable
                                                      v-model="variant.action.item"/>
+                                    </UFormGroup>
+
+                                    <div class="flex gap-2.5">
+                                        <UFormGroup label="Visibility type" class="grow">
+                                            <USelectMenu :options="visibilityTypes"
+                                                         value-attribute="key"
+                                                         v-model="variant.visibility.type"/>
+                                        </UFormGroup>
+
+                                        <UFormGroup label="!" :ui="{label: {wrapper: 'justify-center'}}">
+                                            <UCheckbox v-model="variant.visibility.negative"/>
+                                        </UFormGroup>
+                                    </div>
+
+                                    <UFormGroup v-if="variant.visibility.type == 'has_item'"
+                                                label="Item">
+                                        <USelectMenu :options="items"
+                                                     option-attribute="name"
+                                                     value-attribute="id"
+                                                     searchable
+                                                     v-model="variant.visibility.item"/>
                                     </UFormGroup>
                                 </div>
                             </div>

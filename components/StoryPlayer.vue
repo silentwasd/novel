@@ -50,11 +50,29 @@ function doAction(action: Action) {
         case 'return_item':
             inventory.value = inventory.value.filter(item => item.id != action.item);
             break;
+
+        case 'nothing':
+        default:
+            break;
     }
 }
 
 const itemShown    = ref<boolean>(false);
 const selectedItem = ref<Item>();
+
+watch(currentSection, section => {
+    if (!section)
+        return;
+
+    doAction(section.startAction);
+});
+
+onMounted(() => {
+    if (!currentSection.value)
+        return;
+
+    doAction(currentSection.value.startAction);
+});
 </script>
 
 <template>

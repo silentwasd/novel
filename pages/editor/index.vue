@@ -14,17 +14,6 @@ const nextSectionId = useLocalStorage<number>('nextSectionId', () => 1, {
     initOnMounted: true
 });
 
-const actionTypes = [{
-    key  : 'go',
-    label: 'Go to'
-}, {
-    key  : 'take_item',
-    label: 'Take item'
-}, {
-    key  : 'return_item',
-    label: 'Return item'
-}];
-
 const visibilityTypes = [{
     key  : 'always',
     label: 'Always'
@@ -42,7 +31,10 @@ const editSectionState = ref<Section>({
     id         : 0,
     title      : '',
     description: '',
-    variants   : []
+    variants   : [],
+    startAction: {
+        type: 'nothing'
+    }
 });
 
 function newSection() {
@@ -50,13 +42,17 @@ function newSection() {
         id         : nextSectionId.value++,
         title      : '',
         description: '',
-        variants   : []
+        variants   : [],
+        startAction: {
+            type: 'nothing'
+        }
     };
 }
 
 function editSection(section: Section) {
     editSectionState.value = {
         ...section,
+        startAction: {...section.startAction},
         variants: [
             ...section.variants.map(variant => ({
                 ...variant,
@@ -83,7 +79,7 @@ function addVariant() {
     editSectionState.value.variants.push({
         label     : '',
         action    : {
-            type: 'go'
+            type: 'nothing'
         },
         visibility: {
             type    : 'always',
@@ -159,6 +155,14 @@ function moveDown(array, index) {
                                    :rows="10"/>
                     </UFormGroup>
 
+                    <div v-if="editSectionState.startAction" class="flex flex-col gap-2.5">
+                        <p class="font-semibold text-sm">Start action</p>
+
+                        <div class="flex flex-col gap-2.5 border-s-2 border-primary bg-gray-950 p-2.5 rounded">
+                            <EditAction v-model="editSectionState.startAction"/>
+                        </div>
+                    </div>
+
                     <div class="flex flex-col gap-2.5">
                         <p class="font-semibold text-sm">Variants</p>
 
@@ -189,29 +193,7 @@ function moveDown(array, index) {
                                 </div>
 
                                 <div class="flex flex-col gap-2.5">
-                                    <UFormGroup label="Type">
-                                        <USelectMenu :options="actionTypes"
-                                                     value-attribute="key"
-                                                     v-model="variant.action.type"/>
-                                    </UFormGroup>
-
-                                    <UFormGroup v-if="variant.action.type == 'go'"
-                                                label="Destination">
-                                        <USelectMenu :options="sections"
-                                                     option-attribute="title"
-                                                     value-attribute="id"
-                                                     searchable
-                                                     v-model="variant.action.destination"/>
-                                    </UFormGroup>
-
-                                    <UFormGroup v-if="['take_item', 'return_item'].includes(variant.action.type)"
-                                                label="Item">
-                                        <USelectMenu :options="items"
-                                                     option-attribute="name"
-                                                     value-attribute="id"
-                                                     searchable
-                                                     v-model="variant.action.item"/>
-                                    </UFormGroup>
+                                    <EditAction v-model="variant.action"/>
 
                                     <div class="flex gap-2.5">
                                         <UFormGroup label="Visibility type" class="grow">

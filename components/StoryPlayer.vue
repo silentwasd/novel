@@ -46,6 +46,10 @@ function doAction(action: Action) {
         case 'take_item':
             inventory.value.push(props.items.find(item => item.id == action.item));
             break;
+
+        case 'return_item':
+            inventory.value = inventory.value.filter(item => item.id != action.item);
+            break;
     }
 }
 

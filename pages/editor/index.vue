@@ -20,6 +20,9 @@ const actionTypes = [{
 }, {
     key  : 'take_item',
     label: 'Take item'
+}, {
+    key  : 'return_item',
+    label: 'Return item'
 }];
 
 const visibilityTypes = [{
@@ -201,7 +204,7 @@ function moveDown(array, index) {
                                                      v-model="variant.action.destination"/>
                                     </UFormGroup>
 
-                                    <UFormGroup v-if="variant.action.type == 'take_item'"
+                                    <UFormGroup v-if="['take_item', 'return_item'].includes(variant.action.type)"
                                                 label="Item">
                                         <USelectMenu :options="items"
                                                      option-attribute="name"

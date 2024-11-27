@@ -1,4 +1,5 @@
 export default interface Action {
-    type: 'go';
+    type: 'go' | 'take_item';
     destination?: number;
+    item?: number;
 }
